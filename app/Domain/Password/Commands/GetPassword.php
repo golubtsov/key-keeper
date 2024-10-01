@@ -23,12 +23,12 @@ class GetPassword extends Command
 
     public function handle(): void
     {
-        $array = $this->service->getPassword($this->argument("id"));
+        $data = $this->service->getPassword($this->argument("id"));
 
-        if (count($array) === 0) {
+        if (count($data) === 0) {
             $this->info("Not found");
         } else {
-            $this->table($this->columns, $array);
+            $this->table($this->columns, [$data]);
         }
     }
 }

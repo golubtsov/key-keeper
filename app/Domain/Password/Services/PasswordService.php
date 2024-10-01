@@ -2,6 +2,8 @@
 
 namespace Domain\Password\Services;
 
+use Domain\Password\Models\Password;
+use Illuminate\Database\Query\Builder;
 use stdClass;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -21,8 +23,26 @@ class PasswordService
 
     private array $password;
 
+    private ?string $resource;
+
+    private int $offset;
+
+    private int $limit;
+
+    private bool $isDecrypt;
+
+    public function initOptions(array $options): void
+    {
+        $this->resource = $options["resource"] ?? null;
+        $this->offset = $options["offset"];
+        $this->limit = $options["limit"];
+        $this->isDecrypt = $options["decrypt"] ?? false;
+    }
+
     public function getPassword(int $id): array
     {
+        $this->isDecrypt = true;
+
         $this->password = (array) DB::table("passwords")
             ->select("passwords.id", "passwords.resource", "passwords.hash")
             ->find($id);
@@ -40,9 +60,11 @@ class PasswordService
      * @return Collection<stdClass>|array
      */
     public function getPasswords(
-        bool $likeArray = true,
-        bool $decrypt = false
+        array $options,
+        bool $likeArray = true
     ): Collection|array {
+        $this->initOptions($options);
+
         $this->passwords = DB::table("passwords")
             ->select(
                 "passwords.id",
@@ -51,13 +73,34 @@ class PasswordService
                 "passwords.updated_at",
                 "passwords.hash"
             )
+            ->when(is_string($this->resource), function (Builder $builder) {
+                $builder->where(
+                    "passwords.resource",
+                    "like",
+                    "%" . $this->resource . "%"
+                );
+            })
+            ->when(isset($this->limit), function (Builder $builder) {
+                $builder->limit($this->limit);
+            })
+            ->when(isset($this->offset), function (Builder $builder) {
+                $builder->offset($this->offset);
+            })
             ->get();
 
-        !$decrypt ?: $this->decryptPasswords();
+        $this->decryptPasswords();
 
         $this->setShortHash()->formatDates();
 
         return $likeArray ? $this->toArray($this->passwords) : $this->passwords;
+    }
+
+    public function delete(int $id): ?bool
+    {
+        $password = DB::table("passwords")
+            ->where("passwords.id", $id)
+            ->first();
+        return is_null($password) ? false : $password->delete;
     }
 
     /**
@@ -130,13 +173,15 @@ class PasswordService
 
     private function decryptPasswords(): static
     {
-        $this->passwords->map(function (stdClass $stdClass) {
-            $stdClass->password = OpenSSL::decrypt(
-                $stdClass->hash,
-                config("openssl.private_key")
-            );
-            return $stdClass;
-        });
+        if ($this->isDecrypt) {
+            $this->passwords->map(function (stdClass $stdClass) {
+                $stdClass->password = OpenSSL::decrypt(
+                    $stdClass->hash,
+                    config("openssl.private_key")
+                );
+                return $stdClass;
+            });
+        }
         return $this;
     }
 }

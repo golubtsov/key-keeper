@@ -4,10 +4,12 @@ namespace Domain\Password\Commands;
 
 use LaravelZero\Framework\Commands\Command;
 use Domain\Password\Services\PasswordService;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class MyPasswords extends Command
 {
-    protected $signature = "passwords:my_passwords {--hash : decrypt password hash}";
+    protected $signature = "passwords:my_passwords";
 
     protected $description = " - My passwords";
 
@@ -28,11 +30,24 @@ class MyPasswords extends Command
         $this->service = new PasswordService();
     }
 
+    protected function configure()
+    {
+        $this->addOption("resource", "R", InputArgument::OPTIONAL, "Resource");
+        $this->addOption("offset", "O", InputArgument::OPTIONAL, "Offset", 0);
+        $this->addOption("limit", "L", InputArgument::OPTIONAL, "Limit", 10);
+        $this->addOption(
+            "decrypt",
+            "D",
+            InputOption::VALUE_NONE,
+            "Decrypt password hash"
+        );
+    }
+
     public function handle(): void
     {
         $this->table(
             $this->columns,
-            $this->service->getPasswords(decrypt: $this->option("hash"))
+            $this->service->getPasswords($this->options())
         );
     }
 }
