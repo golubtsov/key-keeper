@@ -3,7 +3,9 @@
 namespace Domain\Password\Services;
 
 use Domain\Password\Models\Password;
+use Exception;
 use Illuminate\Database\Query\Builder;
+use LaravelZero\Framework\Commands\Command;
 use stdClass;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -31,6 +33,13 @@ class PasswordService
 
     private bool $isDecrypt;
 
+    private static string $key;
+
+    public function __construct()
+    {
+        static::$key = config("openssl.private_key");
+    }
+
     public function initOptions(array $options): void
     {
         $this->resource = $options["resource"] ?? null;
@@ -43,7 +52,7 @@ class PasswordService
     {
         $this->isDecrypt = true;
 
-        $this->password = (array) DB::table("passwords")
+        $this->password = (array)DB::table("passwords")
             ->select("passwords.id", "passwords.resource", "passwords.hash")
             ->find($id);
 
@@ -61,8 +70,9 @@ class PasswordService
      */
     public function getPasswords(
         array $options,
-        bool $likeArray = true
-    ): Collection|array {
+        bool  $likeArray = true
+    ): Collection|array
+    {
         $this->initOptions($options);
 
         $this->passwords = DB::table("passwords")
@@ -132,7 +142,7 @@ class PasswordService
         return array_map(function (string $item) {
             $result = explode("|", $item);
             return [
-                "id" => (int) $result[0],
+                "id" => (int)$result[0],
                 "created_at" => Carbon::parse($result[1])->timestamp,
             ];
         }, explode(",", $data));
@@ -183,5 +193,37 @@ class PasswordService
             });
         }
         return $this;
+    }
+
+    public function create(Command $command): void
+    {
+        $resource = $command->ask("Enter resource");
+
+        $login = $command->ask("Enter login");
+
+        $password = $command->secret("Enter password");
+
+        $hash = OpenSSL::encrypt($password, static::$key);
+
+        try {
+            DB::beginTransaction();
+
+            DB::table("passwords")->insert([
+                "hash" => $hash,
+                "login" => $login,
+                "resource" => $resource,
+                "created_at" => now(),
+                "updated_at" => now(),
+            ]);
+
+            DB::commit();
+
+            $command->info("Password saved!");
+        } catch (Exception $exception) {
+            DB::rollBack();
+            $command->error("Something went wrong!");
+            $command->error("Message: " . $exception->getMessage());
+            $command->error("Line: " . $exception->getLine());
+        }
     }
 }

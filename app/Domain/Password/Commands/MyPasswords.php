@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputOption;
 
 class MyPasswords extends Command
 {
-    protected $signature = "passwords:my_passwords";
+    protected $signature = "passwords:list";
 
     protected $description = " - My passwords";
 
@@ -30,7 +30,7 @@ class MyPasswords extends Command
         $this->service = new PasswordService();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->addOption("resource", "R", InputArgument::OPTIONAL, "Resource");
         $this->addOption("offset", "O", InputArgument::OPTIONAL, "Offset", 0);
