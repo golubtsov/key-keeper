@@ -208,13 +208,7 @@ class PasswordService
         try {
             DB::beginTransaction();
 
-            DB::table("passwords")->insert([
-                "hash" => $hash,
-                "login" => $login,
-                "resource" => $resource,
-                "created_at" => now(),
-                "updated_at" => now(),
-            ]);
+            $this->insertInDb($hash, $login, $resource);
 
             DB::commit();
 
@@ -224,6 +218,40 @@ class PasswordService
             $command->error("Something went wrong!");
             $command->error("Message: " . $exception->getMessage());
             $command->error("Line: " . $exception->getLine());
+        }
+    }
+
+    public function insertInDb(string $hash, string $login, string $resource): void
+    {
+        DB::table("passwords")->insert([
+            "hash" => $hash,
+            "login" => $login,
+            "resource" => $resource,
+            "created_at" => now(),
+            "updated_at" => now(),
+        ]);
+    }
+
+    public function getHash(string $string): string
+    {
+        return OpenSSL::encrypt($string, static::$key);
+    }
+
+    public function upload(string $path): void
+    {
+        $row = 1;
+        if (($handle = fopen($path, "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                if ($row !== 1) {
+                    $resource = $data[0];
+                    $login = $data[2];
+                    $password = $data[3];
+                    $hash = $this->getHash($password);
+                    $this->insertInDb($hash, $login, $resource);
+                }
+                $row++;
+            }
+            fclose($handle);
         }
     }
 }
