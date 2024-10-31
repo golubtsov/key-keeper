@@ -44,16 +44,16 @@ class PasswordService
     public function initOptions(array $options): void
     {
         $this->resource = $options['resource'] ?? null;
-        $this->offset = $options['offset'];
-        $this->limit = $options['limit'];
-        $this->isDecrypt = $options['decrypt'] ?? false;
+        $this->offset = (int)$options['offset'];
+        $this->limit = (int)$options['limit'];
+        $this->isDecrypt = (bool)$options['decrypt'] ?? false;
     }
 
     public function getPassword(int $id): array
     {
         $this->isDecrypt = true;
 
-        $this->password = (array) DB::table('passwords')
+        $this->password = (array)DB::table('passwords')
             ->select('passwords.id', 'passwords.resource', 'passwords.hash')
             ->find($id);
 
@@ -71,32 +71,12 @@ class PasswordService
      */
     public function getPasswords(
         array $options,
-        bool $likeArray = true
-    ): Collection|array {
+        bool  $likeArray = true
+    ): Collection|array
+    {
         $this->initOptions($options);
 
-        $this->passwords = DB::table('passwords')
-            ->select(
-                'passwords.id',
-                'passwords.resource',
-                'passwords.created_at',
-                'passwords.updated_at',
-                'passwords.hash'
-            )
-            ->when(is_string($this->resource), function (Builder $builder): void {
-                $builder->where(
-                    'passwords.resource',
-                    'like',
-                    '%' . $this->resource . '%'
-                );
-            })
-            ->when(isset($this->limit), function (Builder $builder): void {
-                $builder->limit($this->limit);
-            })
-            ->when(isset($this->offset), function (Builder $builder): void {
-                $builder->offset($this->offset);
-            })
-            ->get();
+        $this->passwords = $this->getPasswordsCollection();
 
         $this->decryptPasswords();
 
@@ -157,20 +137,56 @@ class PasswordService
 
     public function upload(string $path): void
     {
-        $row = 1;
-        if (($handle = fopen($path, 'r')) !== false) {
-            while (($data = fgetcsv($handle, 1000, ',')) !== false) {
-                if ($row !== 1) {
-                    $resource = $data[0];
-                    $login = $data[2];
-                    $password = $data[3];
-                    $hash = $this->getHash($password);
-                    $this->insertInDb($hash, $login, $resource);
+        DB::beginTransaction();
+
+        try {
+            $row = 1;
+            if (($handle = fopen($path, 'r')) !== false) {
+                while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+                    if ($row !== 1) {
+                        $resource = $data[0];
+                        $login = $data[2];
+                        $password = $data[3];
+                        $hash = $this->getHash($password);
+                        $this->insertInDb($hash, $login, $resource);
+                    }
+                    $row++;
                 }
-                $row++;
+                fclose($handle);
             }
-            fclose($handle);
+
+            DB::commit();
+        } catch (Exception $exception) {
+            echo $exception->getMessage() . PHP_EOL;
+            echo $exception->getLine() . PHP_EOL;
+            DB::rollBack();
         }
+    }
+
+    private function getPasswordsCollection(): Collection
+    {
+        return DB::table('passwords')
+            ->select(
+                'passwords.id',
+                'passwords.resource',
+                'passwords.created_at',
+                'passwords.updated_at',
+                'passwords.hash'
+            )
+            ->when(is_string($this->resource), function (Builder $builder): void {
+                $builder->where(
+                    'passwords.resource',
+                    'like',
+                    '%' . $this->resource . '%'
+                );
+            })
+            ->when(isset($this->limit), function (Builder $builder): void {
+                $builder->limit($this->limit);
+            })
+            ->when(isset($this->offset), function (Builder $builder): void {
+                $builder->offset($this->offset);
+            })
+            ->get();
     }
 
     /**
@@ -202,7 +218,7 @@ class PasswordService
         return array_map(function (string $item) {
             $result = explode('|', $item);
             return [
-                'id' => (int) $result[0],
+                'id' => (int)$result[0],
                 'created_at' => Carbon::parse($result[1])->timestamp,
             ];
         }, explode(',', $data));
