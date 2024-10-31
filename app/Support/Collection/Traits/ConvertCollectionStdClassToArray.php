@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Support\Collection\Traits;
 
 use Illuminate\Support\Collection;
@@ -9,12 +11,11 @@ trait ConvertCollectionStdClassToArray
 {
     /**
      * @param Collection<stdClass> $collection
-     * @return array
      */
     private function toArray(Collection $collection): array
     {
         return $collection
-            ->map(fn(stdClass $stdClass) => (array) $stdClass)
+            ->map(fn (stdClass $stdClass) => (array) $stdClass)
             ->toArray();
     }
 

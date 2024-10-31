@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Domain\Password\Commands\AddNewPassword;
 use Domain\Password\Commands\DeletePassword;
 use Domain\Password\Commands\GetPassword;
-use Domain\Password\Commands\UploadFromFile;
 use Domain\Password\Commands\MyPasswords;
+use Domain\Password\Commands\UploadFromFile;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

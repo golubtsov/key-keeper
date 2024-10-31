@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Password\Commands;
 
 use Domain\Password\Services\PasswordService;
@@ -7,9 +9,9 @@ use LaravelZero\Framework\Commands\Command;
 
 class UploadFromFile extends Command
 {
-    protected $signature = "passwords:upload {path}";
+    protected $signature = 'passwords:upload {path}';
 
-    protected $description = " - Upload passwords";
+    protected $description = ' - Upload passwords';
 
     public function __construct(private readonly PasswordService $service)
     {
