@@ -12,10 +12,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use stdClass;
+use Support\Collection\Traits\ConvertCollectionStdClassToArray;
 use Support\Hash\OpenSSL;
 
 class PasswordService
 {
+    use ConvertCollectionStdClassToArray;
+
     /**
      * @var Collection<stdClass>|array
      */
@@ -35,7 +38,7 @@ class PasswordService
 
     public function __construct()
     {
-        static::$key = config('openssl.private_key');
+        self::$key = config('openssl.private_key');
     }
 
     public function initOptions(array $options): void
@@ -43,7 +46,7 @@ class PasswordService
         $this->resource = $options['resource'] ?? null;
         $this->offset = (int)$options['offset'];
         $this->limit = (int)$options['limit'];
-        $this->isDecrypt = (bool)$options['decrypt'] ?? false;
+        $this->isDecrypt = (bool)$options['decrypt'];
     }
 
     public function getPassword(int $id): array
@@ -98,7 +101,7 @@ class PasswordService
 
         $password = $command->secret('Enter password');
 
-        $hash = OpenSSL::encrypt($password, static::$key);
+        $hash = OpenSSL::encrypt($password, self::$key);
 
         try {
             DB::beginTransaction();
@@ -129,7 +132,7 @@ class PasswordService
 
     public function getHash(string $string): string
     {
-        return OpenSSL::encrypt($string, static::$key);
+        return OpenSSL::encrypt($string, self::$key);
     }
 
     public function upload(string $path): void
@@ -184,41 +187,6 @@ class PasswordService
                 $builder->offset($this->offset);
             })
             ->get();
-    }
-
-    /**
-     * @return Collection<stdClass>
-     */
-    private function groupByResource(): Collection
-    {
-        /** @var Collection<stdClass> $passwords */
-        $passwords = DB::table('passwords')
-            ->select('passwords.id', 'passwords.resource')
-            ->selectRaw(
-                'GROUP_CONCAT(CONCAT(passwords.id, "|", passwords.created_at)) as passwords'
-            )
-            ->groupBy('passwords.resource')
-            ->get()
-            ->collect();
-
-        $passwords->map(function (stdClass $stdClass): void {
-            $stdClass->passwords = $this->parsePasswordDataFromString(
-                $stdClass->passwords
-            );
-        });
-
-        return $passwords;
-    }
-
-    private function parsePasswordDataFromString(string $data): array
-    {
-        return array_map(function (string $item) {
-            $result = explode('|', $item);
-            return [
-                'id' => (int)$result[0],
-                'created_at' => Carbon::parse($result[1])->timestamp,
-            ];
-        }, explode(',', $data));
     }
 
     private function formatDates(): static

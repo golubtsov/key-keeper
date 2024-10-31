@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Password\Models;
 
+use Barryvdh\LaravelIdeHelper\Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
@@ -25,7 +26,7 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder|Password whereResource($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Password whereUpdatedAt($value)
  *
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class Password extends Model
 {
