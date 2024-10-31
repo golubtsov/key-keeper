@@ -12,13 +12,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use stdClass;
-use Support\Collection\Traits\ConvertCollectionStdClassToArray;
 use Support\Hash\OpenSSL;
 
 class PasswordService
 {
-    use ConvertCollectionStdClassToArray;
-
     /**
      * @var Collection<stdClass>|array
      */
