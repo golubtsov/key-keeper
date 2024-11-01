@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "45e5e462952307777ade29d4fdf19819",
+    "content-hash": "905393f98ad8a2e6324a602630376adf",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -1714,16 +1714,16 @@
         },
         {
             "name": "illuminate/view",
-            "version": "v11.25.0",
+            "version": "v11.30.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/view.git",
-                "reference": "2b72540d4c1ae01eca9376f2f4c2c1c09cf47e61"
+                "reference": "b0ca05925b882b7887f9c2591497a1b2835f9144"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/view/zipball/2b72540d4c1ae01eca9376f2f4c2c1c09cf47e61",
-                "reference": "2b72540d4c1ae01eca9376f2f4c2c1c09cf47e61",
+                "url": "https://api.github.com/repos/illuminate/view/zipball/b0ca05925b882b7887f9c2591497a1b2835f9144",
+                "reference": "b0ca05925b882b7887f9c2591497a1b2835f9144",
                 "shasum": ""
             },
             "require": {
@@ -1764,7 +1764,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-09-16T14:20:17+00:00"
+            "time": "2024-10-24T14:26:35+00:00"
         },
         {
             "name": "jolicode/jolinotif",
@@ -10673,7 +10673,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -10681,6 +10681,6 @@
         "ext-openssl": "*",
         "ext-pdo": "*"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }

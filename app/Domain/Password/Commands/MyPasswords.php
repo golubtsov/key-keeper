@@ -8,6 +8,7 @@ use Domain\Password\Services\PasswordService;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use function Termwind\render;
 
 class MyPasswords extends Command
 {
@@ -19,9 +20,10 @@ class MyPasswords extends Command
 
     private array $columns = [
         'id',
+        'login',
         'resource',
-        'created_at',
-        'updated_at',
+//        'created_at',
+//        'updated_at',
         'hash',
         'password',
     ];
@@ -30,14 +32,6 @@ class MyPasswords extends Command
     {
         parent::__construct();
         $this->service = new PasswordService();
-    }
-
-    public function handle(): void
-    {
-        $this->table(
-            $this->columns,
-            $this->service->getPasswords($this->options())
-        );
     }
 
     protected function configure(): void
@@ -50,6 +44,14 @@ class MyPasswords extends Command
             'D',
             InputOption::VALUE_NONE,
             'Decrypt password hash'
+        );
+    }
+
+    public function handle(): void
+    {
+        $this->table(
+            $this->columns,
+            $this->service->getPasswords($this->options())
         );
     }
 }

@@ -6,7 +6,7 @@ namespace Domain\Password\Services;
 
 use Exception;
 use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Carbon;
+//use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -44,16 +44,16 @@ class PasswordService
     public function initOptions(array $options): void
     {
         $this->resource = $options['resource'] ?? null;
-        $this->offset = (int)$options['offset'];
-        $this->limit = (int)$options['limit'];
-        $this->isDecrypt = (bool)$options['decrypt'];
+        $this->offset = (int) $options['offset'];
+        $this->limit = (int) $options['limit'];
+        $this->isDecrypt = (bool) $options['decrypt'];
     }
 
     public function getPassword(int $id): array
     {
         $this->isDecrypt = true;
 
-        $this->password = (array)DB::table('passwords')
+        $this->password = (array) DB::table('passwords')
             ->select('passwords.id', 'passwords.resource', 'passwords.hash')
             ->find($id);
 
@@ -71,16 +71,16 @@ class PasswordService
      */
     public function getPasswords(
         array $options,
-        bool  $likeArray = true
-    ): Collection|array
-    {
+        bool $likeArray = true
+    ): Collection|array {
         $this->initOptions($options);
 
         $this->passwords = $this->getPasswordsCollection();
 
         $this->decryptPasswords();
 
-        $this->setShortHash()->formatDates();
+        $this->setShortHash();
+//        $this->formatDates();
 
         return $likeArray ? $this->toArray($this->passwords) : $this->passwords;
     }
@@ -168,9 +168,10 @@ class PasswordService
         return DB::table('passwords')
             ->select(
                 'passwords.id',
+                'passwords.login',
                 'passwords.resource',
-                'passwords.created_at',
-                'passwords.updated_at',
+//                'passwords.created_at',
+//                'passwords.updated_at',
                 'passwords.hash'
             )
             ->when(is_string($this->resource), function (Builder $builder): void {
@@ -189,19 +190,22 @@ class PasswordService
             ->get();
     }
 
-    private function formatDates(): static
-    {
-        $this->passwords->map(function (stdClass $stdClass) {
-            $stdClass->updated_at = Carbon::parse(
-                $stdClass->updated_at
-            )->format('d.m.Y');
-            $stdClass->created_at = Carbon::parse(
-                $stdClass->created_at
-            )->format('d.m.Y');
-            return $stdClass;
-        });
-        return $this;
-    }
+//    private function formatDates(): static
+//    {
+//        $this->passwords->map(
+//            function (stdClass $stdClass) {
+//                $stdClass->updated_at = $this->getCarbonToStringFormat($stdClass->updated_at);
+//                $stdClass->created_at = $this->getCarbonToStringFormat($stdClass->created_at);
+//                return $stdClass;
+//            }
+//        );
+//        return $this;
+//    }
+
+//    private function getCarbonToStringFormat(string $timestamp): string
+//    {
+//        return Carbon::parse($timestamp)->format('d.m.Y');
+//    }
 
     private function setShortHash(): static
     {
