@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Domain\Password\Commands;
 
+use App\Command\Traits\NeedClearConsoleTrait;
 use Domain\Password\Services\PasswordService;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-use function Termwind\render;
 
 class MyPasswords extends Command
 {
+    use NeedClearConsoleTrait;
+
     protected $signature = 'passwords:list';
 
     protected $description = ' - My passwords';
@@ -53,5 +55,7 @@ class MyPasswords extends Command
             $this->columns,
             $this->service->getPasswords($this->options())
         );
+
+        $this->clearConsole();
     }
 }

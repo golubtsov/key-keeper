@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Domain\Password\Commands;
 
+use App\Command\Traits\NeedClearConsoleTrait;
 use Domain\Password\Services\PasswordService;
 use LaravelZero\Framework\Commands\Command;
 
 class GetPassword extends Command
 {
+    use NeedClearConsoleTrait;
+
     protected $signature = 'passwords:get_password {id}';
 
     protected $description = ' - Get password';
@@ -32,5 +35,7 @@ class GetPassword extends Command
         } else {
             $this->table($this->columns, [$data]);
         }
+
+        $this->clearConsole();
     }
 }

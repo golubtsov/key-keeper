@@ -51,6 +51,15 @@
             "pestphp/pest-plugin": true
         }
     },
+    "scripts": {
+        "build": [
+            "php key-keeper app:build",
+            "bash -c 'if [ -f .env ]; then cp .env ./builds/.env; fi'"
+        ],
+        "phpstan": ["vendor/bin/phpstan analyse"],
+        "code": ["./vendor/bin/phpinsights"],
+        "code-fix": ["./vendor/bin/phpinsights --fix"]
+    },
     "minimum-stability": "stable",
     "prefer-stable": true,
     "bin": [
