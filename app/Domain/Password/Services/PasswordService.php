@@ -6,19 +6,16 @@ namespace Domain\Password\Services;
 
 use Exception;
 use Illuminate\Database\Query\Builder;
-//use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use stdClass;
-use Support\Collection\Traits\ConvertCollectionStdClassToArray;
+use Support\Collection\ConvertCollectionStdClassesToArray;
 use Support\Hash\OpenSSL;
 
 class PasswordService
 {
-    use ConvertCollectionStdClassToArray;
-
     /**
      * @var Collection<stdClass>|array
      */
@@ -36,8 +33,9 @@ class PasswordService
 
     private static string $key;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ConvertCollectionStdClassesToArray $convert
+    ) {
         self::$key = config('openssl.private_key');
     }
 
@@ -82,7 +80,7 @@ class PasswordService
         $this->setShortHash();
 //        $this->formatDates();
 
-        return $likeArray ? $this->toArray($this->passwords) : $this->passwords;
+        return $likeArray ? $this->convert->toArray($this->passwords) : $this->passwords;
     }
 
     public function delete(int $id): ?bool
@@ -170,17 +168,18 @@ class PasswordService
                 'passwords.id',
                 'passwords.login',
                 'passwords.resource',
-//                'passwords.created_at',
-//                'passwords.updated_at',
                 'passwords.hash'
             )
-            ->when(is_string($this->resource), function (Builder $builder): void {
-                $builder->where(
-                    'passwords.resource',
-                    'like',
-                    '%' . $this->resource . '%'
-                );
-            })
+            ->when(
+                is_string($this->resource),
+                function (Builder $builder): void {
+                    $builder->where(
+                        'passwords.resource',
+                        'like',
+                        '%' . $this->resource . '%'
+                    );
+                }
+            )
             ->when(isset($this->limit), function (Builder $builder): void {
                 $builder->limit($this->limit);
             })
@@ -190,43 +189,24 @@ class PasswordService
             ->get();
     }
 
-//    private function formatDates(): static
-//    {
-//        $this->passwords->map(
-//            function (stdClass $stdClass) {
-//                $stdClass->updated_at = $this->getCarbonToStringFormat($stdClass->updated_at);
-//                $stdClass->created_at = $this->getCarbonToStringFormat($stdClass->created_at);
-//                return $stdClass;
-//            }
-//        );
-//        return $this;
-//    }
-
-//    private function getCarbonToStringFormat(string $timestamp): string
-//    {
-//        return Carbon::parse($timestamp)->format('d.m.Y');
-//    }
-
-    private function setShortHash(): static
+    private function setShortHash(): void
     {
         $this->passwords->map(function (stdClass $stdClass) {
             $stdClass->hash = Str::substr($stdClass->hash, 0, 8) . '...';
             return $stdClass;
         });
-        return $this;
     }
 
-    private function decryptPassword(): static
+    private function decryptPassword(): void
     {
         $this->password['password'] = OpenSSL::decrypt(
             $this->password['hash'],
             config('openssl.private_key')
         );
         unset($this->password['hash']);
-        return $this;
     }
 
-    private function decryptPasswords(): static
+    private function decryptPasswords(): void
     {
         if ($this->isDecrypt) {
             $this->passwords->map(function (stdClass $stdClass) {
@@ -237,6 +217,5 @@ class PasswordService
                 return $stdClass;
             });
         }
-        return $this;
     }
 }

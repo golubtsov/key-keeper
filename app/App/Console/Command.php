@@ -1,14 +1,18 @@
 <?php
 
-namespace App\Command\Traits;
+declare(strict_types=1);
 
-trait NeedClearConsoleTrait
+namespace App\Console;
+
+use LaravelZero\Framework\Commands\Command as LaravelZeroCommand;
+
+class Command extends LaravelZeroCommand
 {
     private const YES = 'Yes';
 
     private const NO = 'No';
 
-    private function clearConsole(): void
+    protected function clearConsole(): void
     {
         $answer = $this->choice(
             'Clear console?',

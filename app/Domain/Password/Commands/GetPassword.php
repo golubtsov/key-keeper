@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Domain\Password\Commands;
 
-use App\Command\Traits\NeedClearConsoleTrait;
+use App\Console\Command;
 use Domain\Password\Services\PasswordService;
-use LaravelZero\Framework\Commands\Command;
 
 class GetPassword extends Command
 {
-    use NeedClearConsoleTrait;
-
     protected $signature = 'passwords:get_password {id}';
 
     protected $description = ' - Get password';
@@ -23,7 +20,7 @@ class GetPassword extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->service = new PasswordService();
+        $this->service = app(PasswordService::class);
     }
 
     public function handle(): void
