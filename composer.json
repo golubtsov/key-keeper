@@ -1,7 +1,7 @@
 {
-    "name": "key-keeper/key-keeper",
-    "description": "The Laravel Zero Framework.",
-    "keywords": ["framework", "laravel", "laravel zero", "console", "cli"],
+    "name": "nigo/key-keeper",
+    "description": "Application for keep passwords and get it from console",
+    "keywords": ["laravel zero", "console", "cli"],
     "type": "project",
     "license": "MIT",
     "authors": [
