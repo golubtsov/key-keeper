@@ -14,10 +14,8 @@
         "ext-openssl": "*",
         "ext-pdo": "*",
         "illuminate/database": "^11.5",
-        "illuminate/view": "^11.5",
         "laravel-zero/framework": "^11.0.0",
-        "nunomaduro/laravel-console-menu": "^3.5",
-        "nunomaduro/laravel-desktop-notifier": "^2.8"
+        "nunomaduro/laravel-console-menu": "^3.5"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.1",
