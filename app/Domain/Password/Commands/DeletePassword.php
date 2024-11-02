@@ -11,14 +11,16 @@ class DeletePassword extends Command
 {
     protected $signature = 'passwords:delete {id}';
 
-    protected $description = ' - Delete password';
+    protected $description = 'Delete password';
+
+    public function __construct(private readonly PasswordService $service)
+    {
+        parent::__construct();
+    }
 
     public function handle(): void
     {
-        /** @var PasswordService $service */
-        $service = app(PasswordService::class);
-
-        $deleted = $service->delete((int) $this->argument('id'));
+        $deleted = $this->service->delete((int) $this->argument('id'));
 
         if ($deleted) {
             $this->info('Deleted!');

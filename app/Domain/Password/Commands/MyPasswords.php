@@ -13,9 +13,7 @@ class MyPasswords extends Command
 {
     protected $signature = 'passwords:list';
 
-    protected $description = ' - My passwords';
-
-    private PasswordService $service;
+    protected $description = 'My passwords';
 
     private array $columns = [
         'id',
@@ -25,10 +23,9 @@ class MyPasswords extends Command
         'password',
     ];
 
-    public function __construct()
+    public function __construct(private readonly PasswordService $service)
     {
         parent::__construct();
-        $this->service = app(PasswordService::class);
     }
 
     public function handle(): void

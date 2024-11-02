@@ -6,31 +6,30 @@
 ## Сборка
 
 ```
-php key-keeper app:build
+composer build
 ```
-
-Не забыть перенести ``.env`` в папку ``./builds``
 
 ## Команды
 
 ```
-passwords:delete        - Delete password
-passwords:get_password  - Get password
-passwords:list          - My passwords
-passwords:new_password  - Add new password
-passwords:upload        - Upload passwords
+php key-keeper start                   - Start project
+php key-keeper passwords:delete        - Delete password
+php key-keeper passwords:get_password  - Get password
+php key-keeper passwords:list          - My passwords
+php key-keeper passwords:new_password  - Add new password
+php key-keeper passwords:upload        - Upload passwords
 ```
 
 ## Разработка
 
 ```
-./vendor/bin/phpinsights
+composer code
 ```
 
 ```
-./vendor/bin/phpinsights --fix
+composer code-fix
 ```
 
 ```
-vendor/bin/phpstan analyse
+composer phpstan
 ```

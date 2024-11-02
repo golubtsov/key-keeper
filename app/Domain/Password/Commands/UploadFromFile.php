@@ -11,7 +11,7 @@ class UploadFromFile extends Command
 {
     protected $signature = 'passwords:upload {path}';
 
-    protected $description = ' - Upload passwords';
+    protected $description = 'Upload passwords';
 
     public function __construct(private readonly PasswordService $service)
     {

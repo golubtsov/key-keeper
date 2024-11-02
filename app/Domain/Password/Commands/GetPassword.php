@@ -11,16 +11,13 @@ class GetPassword extends Command
 {
     protected $signature = 'passwords:get_password {id}';
 
-    protected $description = ' - Get password';
-
-    private PasswordService $service;
+    protected $description = 'Get password';
 
     private array $columns = ['id', 'resource', 'password'];
 
-    public function __construct()
+    public function __construct(private readonly PasswordService $service)
     {
         parent::__construct();
-        $this->service = app(PasswordService::class);
     }
 
     public function handle(): void

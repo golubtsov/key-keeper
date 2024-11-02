@@ -11,7 +11,7 @@ class AddNewPassword extends Command
 {
     protected $signature = 'passwords:new_password';
 
-    protected $description = ' - Add new password';
+    protected $description = 'Add new password';
 
     public function __construct(private readonly PasswordService $service)
     {

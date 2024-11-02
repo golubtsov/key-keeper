@@ -52,7 +52,12 @@ class PasswordService
         $this->isDecrypt = true;
 
         $this->password = (array) DB::table('passwords')
-            ->select('passwords.id', 'passwords.resource', 'passwords.hash')
+            ->select(
+                'passwords.id',
+                'passwords.resource',
+                'passwords.login',
+                'passwords.hash'
+            )
             ->find($id);
 
         if (count(array_keys($this->password)) === 0) {
@@ -78,9 +83,20 @@ class PasswordService
         $this->decryptPasswords();
 
         $this->setShortHash();
-//        $this->formatDates();
 
         return $likeArray ? $this->convert->toArray($this->passwords) : $this->passwords;
+    }
+
+    /**
+     * @return Collection<stdClass>
+     */
+    public function getPasswordsByResourceOrLogin(string $search): Collection
+    {
+        return DB::table('passwords')
+            ->selectRaw('passwords.id, passwords.resource, passwords.login')
+            ->where('resource', 'like', '%' . $search . '%')
+            ->orWhere('login', 'like', '%' . $search . '%')
+            ->get();
     }
 
     public function delete(int $id): ?bool
