@@ -13,7 +13,7 @@ class GetPassword extends Command
 
     protected $description = 'Get password';
 
-    private array $columns = ['id', 'resource', 'password'];
+    private array $columns = ['id', 'resource', 'login', 'password'];
 
     public function __construct(private readonly PasswordService $service)
     {

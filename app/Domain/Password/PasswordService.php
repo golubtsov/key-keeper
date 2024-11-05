@@ -6,23 +6,22 @@ namespace Domain\Password;
 
 use Domain\Password\Commands\UpdatePassword;
 use Exception;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
 use stdClass;
-use Support\Collection\ConvertCollectionStdClassesToArray;
 use Support\Hash\OpenSSL;
 
 final class PasswordService
 {
     /**
-     * @var Collection<stdClass>|array
+     * @var Collection<Password>|array
      */
     private Collection|array $passwords;
 
-    private array $password;
+    private Password $password;
 
     private ?string $resource;
 
@@ -34,9 +33,8 @@ final class PasswordService
 
     private static string $key;
 
-    public function __construct(
-        private readonly ConvertCollectionStdClassesToArray $convert
-    ) {
+    public function __construct()
+    {
         self::$key = config('openssl.private_key');
     }
 
@@ -52,22 +50,17 @@ final class PasswordService
     {
         $this->isDecrypt = true;
 
-        $this->password = (array) DB::table('passwords')
-            ->select(
-                'passwords.id',
-                'passwords.resource',
-                'passwords.login',
-                'passwords.hash'
-            )
-            ->find($id);
-
-        if (count(array_keys($this->password)) === 0) {
-            return [];
-        }
+        $this->password = Password::query()->find($id, [
+            'id',
+            'resource',
+            'login',
+            'hash',
+            'comment',
+        ]);
 
         $this->decryptPassword();
 
-        return $this->password;
+        return $this->password->toArray();
     }
 
     public function update(UpdatePassword $command): void
@@ -102,38 +95,40 @@ final class PasswordService
     /**
      * @return Collection<stdClass>|array
      */
-    public function getPasswords(
-        array $options,
-        bool $likeArray = true
-    ): Collection|array {
+    public function getPasswords(array $options): Collection|array
+    {
         $this->initOptions($options);
 
         $this->passwords = $this->getPasswordsCollection();
 
         $this->decryptPasswords();
 
-        $this->shortHashView();
+        if (! $this->isDecrypt) {
+            $this->shortHashView();
+        }
 
-        return $likeArray ? $this->convert->toArray($this->passwords) : $this->passwords;
+        return $this->passwords->toArray();
     }
 
     /**
-     * @return Collection<stdClass>
+     * @return Collection<Password>
      */
     public function getPasswordsByResourceOrLogin(string $search): Collection
     {
-        return DB::table('passwords')
-            ->selectRaw('passwords.id, passwords.resource, passwords.login')
+        return Password::query()
             ->where('resource', 'like', '%' . $search . '%')
             ->orWhere('login', 'like', '%' . $search . '%')
-            ->get();
+            ->get([
+                'id',
+                'resource',
+                'login',
+            ]);
     }
 
     public function delete(int $id): ?bool
     {
-        $password = DB::table('passwords')
-            ->where('passwords.id', $id)
-            ->first();
+        $password = Password::query()->find($id);
+
         return is_null($password) ? false : $password->delete;
     }
 
@@ -242,37 +237,39 @@ final class PasswordService
         return $password;
     }
 
+    /**
+     * @return Collection<Password>
+     */
     private function getPasswordsCollection(): Collection
     {
-        return DB::table('passwords')
-            ->select(
-                'passwords.id',
-                'passwords.login',
-                'passwords.resource',
-                'passwords.hash'
-            )
-            ->when(
-                is_string($this->resource),
-                function (Builder $builder): void {
-                    $builder->where(
-                        'passwords.resource',
-                        'like',
-                        '%' . $this->resource . '%'
-                    );
-                }
-            )
+        return Password::query()->when(
+            is_string($this->resource),
+            function (Builder $builder): void {
+                $builder->where(
+                    'passwords.resource',
+                    'like',
+                    '%' . $this->resource . '%'
+                );
+            }
+        )
             ->when(isset($this->limit), function (Builder $builder): void {
                 $builder->limit($this->limit);
             })
             ->when(isset($this->offset), function (Builder $builder): void {
                 $builder->offset($this->offset);
             })
-            ->get();
+            ->get([
+                'id',
+                'login',
+                'resource',
+                'hash',
+                'comment',
+            ]);
     }
 
     private function shortHashView(): void
     {
-        $this->passwords->map(static function (stdClass $stdClass) {
+        $this->passwords->map(static function (Password $stdClass) {
             $stdClass->hash = Str::substr($stdClass->hash, 0, 8) . '...';
             return $stdClass;
         });
@@ -280,22 +277,21 @@ final class PasswordService
 
     private function decryptPassword(): void
     {
-        $this->password['password'] = OpenSSL::decrypt(
+        $this->password->hash = OpenSSL::decrypt(
             $this->password['hash'],
             self::$key
         );
-        unset($this->password['hash']);
     }
 
     private function decryptPasswords(): void
     {
         if ($this->isDecrypt) {
-            $this->passwords->map(static function (stdClass $stdClass) {
-                $stdClass->password = OpenSSL::decrypt(
-                    $stdClass->hash,
+            $this->passwords->map(static function (Password $password) {
+                $password->hash = OpenSSL::decrypt(
+                    $password->hash,
                     self::$key
                 );
-                return $stdClass;
+                return $password;
             });
         }
     }

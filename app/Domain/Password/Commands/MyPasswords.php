@@ -11,16 +11,16 @@ use Symfony\Component\Console\Input\InputOption;
 
 class MyPasswords extends Command
 {
+
     protected $signature = 'passwords:list';
 
     protected $description = 'My passwords';
-
     private array $columns = [
         'id',
         'login',
         'resource',
         'hash',
-        'password',
+        'comment',
     ];
 
     public function __construct(private readonly PasswordService $service)

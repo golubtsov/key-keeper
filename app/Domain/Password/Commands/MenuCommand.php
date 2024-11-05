@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace Domain\Password\Commands;
 
 use App\Console\Command;
+use Domain\Password\Password;
 use Domain\Password\PasswordService;
-use Domain\Password\PasswordStdClass;
 use Illuminate\Support\Collection;
-use stdClass;
 
 class MenuCommand extends Command
 {
@@ -18,7 +17,7 @@ class MenuCommand extends Command
 
     private array $menu = [];
 
-    private array $columns = ['login', 'password'];
+    private array $columns = ['id', 'login', 'password', 'comment'];
 
     public function __construct(private readonly PasswordService $service)
     {
@@ -33,7 +32,6 @@ class MenuCommand extends Command
             $answer = $this->ask('Enter resource name or login');
         }
 
-        /** @var Collection<PasswordStdClass> $passwords */
         $passwords = $this->service->getPasswordsByResourceOrLogin($answer);
 
         $this->createMenu($passwords);
@@ -53,9 +51,8 @@ class MenuCommand extends Command
     private function createMenu(Collection $passwords): void
     {
         $passwords->map(
-            function (stdClass $passwordsStdClass): void {
-                /** @var PasswordStdClass $passwordsStdClass */
-                $this->menu[$passwordsStdClass->id] = $passwordsStdClass->resource . ' | ' . $passwordsStdClass->login;
+            function (Password $password): void {
+                $this->menu[$password->id] = $password->resource . ' | ' . $password->login;
             }
         );
     }
@@ -67,8 +64,10 @@ class MenuCommand extends Command
     {
         return [
             [
+                'id' => $password['id'],
                 'login' => $password['login'],
-                'password' => $password['password'],
+                'hash' => $password['hash'],
+                'comment' => $password['comment'],
             ],
         ];
     }
