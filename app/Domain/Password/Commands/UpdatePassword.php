@@ -23,11 +23,4 @@ class UpdatePassword extends Command
     {
         $this->service->update($this);
     }
-
-    protected function configure(): void
-    {
-        $this->addOption('resource', 'R', InputArgument::OPTIONAL, 'New resource name');
-        $this->addOption('login', 'L', InputArgument::OPTIONAL, 'New login name');
-        $this->addOption('password', 'P', InputArgument::OPTIONAL, 'New password');
-    }
 }
