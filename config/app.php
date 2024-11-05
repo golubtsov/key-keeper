@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -12,7 +14,7 @@ return [
     |
     */
 
-    "name" => "Key Kipper",
+    'name' => 'Key Kipper',
 
     /*
     |--------------------------------------------------------------------------
@@ -25,7 +27,7 @@ return [
     |
     */
 
-    "version" => app("git.version"),
+    'version' => app('git.version'),
 
     /*
     |--------------------------------------------------------------------------
@@ -39,7 +41,7 @@ return [
     |
     */
 
-    "env" => env("APP_STATE", "development"),
+    'env' => env('APP_STATE', 'development'),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,5 +54,5 @@ return [
     |
     */
 
-    "providers" => [\App\Providers\AppServiceProvider::class],
+    'providers' => [\App\Providers\AppServiceProvider::class],
 ];

@@ -9,7 +9,7 @@ use LaravelZero\Framework\Commands\Command;
 
 class AddNewPassword extends Command
 {
-    protected $signature = 'passwords:new_password';
+    protected $signature = 'passwords:new';
 
     protected $description = 'Add new password';
 

@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $login
  * @property string $resource
+ * @property string|null $comment
  * @property string $hash
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -34,5 +35,6 @@ class Password extends Model
         'login',
         'resource',
         'hash',
+        'comment',
     ];
 }

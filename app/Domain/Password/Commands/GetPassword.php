@@ -9,7 +9,7 @@ use Domain\Password\Services\PasswordService;
 
 class GetPassword extends Command
 {
-    protected $signature = 'passwords:get_password {id}';
+    protected $signature = 'passwords:get {id}';
 
     protected $description = 'Get password';
 

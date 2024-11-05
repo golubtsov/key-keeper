@@ -15,7 +15,7 @@ class ConvertCollectionStdClassesToArray
     public function toArray(Collection $collection): array
     {
         return $collection
-            ->map(fn (stdClass $stdClass) => (array) $stdClass)
+            ->map(static fn (stdClass $stdClass) => (array) $stdClass)
             ->toArray();
     }
 }

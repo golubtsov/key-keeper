@@ -56,8 +56,8 @@
             "bash -c 'if [ -f .env ]; then cp .env ./builds/.env; fi'"
         ],
         "phpstan": ["vendor/bin/phpstan analyse"],
-        "code": ["./vendor/bin/phpinsights"],
-        "code-fix": ["./vendor/bin/phpinsights --fix"]
+        "code": ["./vendor/bin/phpinsights --config-path='config/phpinsights.php'"],
+        "code-fix": ["./vendor/bin/phpinsights --fix --config-path='config/phpinsights.php'"]
     },
     "minimum-stability": "stable",
     "prefer-stable": true,

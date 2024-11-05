@@ -16,7 +16,7 @@ use stdClass;
 use Support\Collection\ConvertCollectionStdClassesToArray;
 use Support\Hash\OpenSSL;
 
-class PasswordService
+final class PasswordService
 {
     /**
      * @var Collection<stdClass>|array
@@ -83,7 +83,7 @@ class PasswordService
             return;
         }
 
-        $password = $this->setNewValuesForPassword($command, $password);
+        $password = $this->newValuesForPassword($command, $password);
 
         if ($password->isDirty()) {
             try {
@@ -113,7 +113,7 @@ class PasswordService
 
         $this->decryptPasswords();
 
-        $this->setShortHash();
+        $this->shortHashView();
 
         return $likeArray ? $this->convert->toArray($this->passwords) : $this->passwords;
     }
@@ -146,12 +146,19 @@ class PasswordService
 
         $password = $command->secret('Enter password');
 
+        $comment = $command->ask('Add comment');
+
         $hash = OpenSSL::encrypt($password, self::$key);
 
         try {
             DB::beginTransaction();
 
-            $this->insertInDb($hash, $login, $resource);
+            Password::query()->create([
+                'login' => $login,
+                'resource' => $resource,
+                'hash' => $hash,
+                'comment' => $comment,
+            ]);
 
             DB::commit();
 
@@ -159,20 +166,7 @@ class PasswordService
         } catch (Exception $exception) {
             DB::rollBack();
             $command->error('Something went wrong!');
-            $command->error('Message: ' . $exception->getMessage());
-            $command->error('Line: ' . $exception->getLine());
         }
-    }
-
-    public function insertInDb(string $hash, string $login, string $resource): void
-    {
-        DB::table('passwords')->insert([
-            'hash' => $hash,
-            'login' => $login,
-            'resource' => $resource,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
     }
 
     public function getHash(string $string): string
@@ -186,14 +180,19 @@ class PasswordService
 
         try {
             $row = 1;
-            if (($handle = fopen($path, 'r')) !== false) {
+            $handle = fopen($path, 'r');
+            if ($handle !== false) {
                 while (($data = fgetcsv($handle, 1000, ',')) !== false) {
                     if ($row !== 1) {
                         $resource = $data[0];
                         $login = $data[2];
                         $password = $data[3];
                         $hash = $this->getHash($password);
-                        $this->insertInDb($hash, $login, $resource);
+                        Password::query()->create([
+                            'login' => $login,
+                            'resource' => $resource,
+                            'hash' => $hash,
+                        ]);
                     }
                     $row++;
                 }
@@ -208,7 +207,7 @@ class PasswordService
         }
     }
 
-    private function setNewValuesForPassword(
+    private function newValuesForPassword(
         UpdatePassword $command,
         Password $password
     ): Password {
@@ -217,6 +216,8 @@ class PasswordService
         $login = $command->ask('Enter new login');
 
         $newPassword = $command->secret('Enter new password');
+
+        $comment = $command->ask('Enter comment to this password');
 
         if ($resource) {
             $password->resource = $resource;
@@ -232,6 +233,8 @@ class PasswordService
                 config('openssl.private_key')
             );
         }
+
+        $password->comment = $comment;
 
         return $password;
     }
@@ -264,9 +267,9 @@ class PasswordService
             ->get();
     }
 
-    private function setShortHash(): void
+    private function shortHashView(): void
     {
-        $this->passwords->map(function (stdClass $stdClass) {
+        $this->passwords->map(static function (stdClass $stdClass) {
             $stdClass->hash = Str::substr($stdClass->hash, 0, 8) . '...';
             return $stdClass;
         });
@@ -284,7 +287,7 @@ class PasswordService
     private function decryptPasswords(): void
     {
         if ($this->isDecrypt) {
-            $this->passwords->map(function (stdClass $stdClass) {
+            $this->passwords->map(static function (stdClass $stdClass) {
                 $stdClass->password = OpenSSL::decrypt(
                     $stdClass->hash,
                     config('openssl.private_key')

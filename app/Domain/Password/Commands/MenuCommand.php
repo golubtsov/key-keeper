@@ -27,12 +27,16 @@ class MenuCommand extends Command
 
     public function handle(): void
     {
-        $answer = $this->ask('Enter resource name or login');
+        $answer = null;
+
+        while ($answer === null) {
+            $answer = $this->ask('Enter resource name or login');
+        }
 
         /** @var Collection<PasswordStdClass> $passwords */
         $passwords = $this->service->getPasswordsByResourceOrLogin($answer);
 
-        $this->setMenu($passwords);
+        $this->createMenu($passwords);
 
         $passwordId = $this->getSelectedPassword();
 
@@ -46,7 +50,7 @@ class MenuCommand extends Command
         $this->clearConsole();
     }
 
-    private function setMenu(Collection $passwords): void
+    private function createMenu(Collection $passwords): void
     {
         $passwords->map(
             function (stdClass $passwordsStdClass): void {

@@ -1,7 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     \App\Providers\AppServiceProvider::class,
-    config("app.env") === "production" ?:
+    config('app.env') === 'production' ?:
     \Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
 ];
