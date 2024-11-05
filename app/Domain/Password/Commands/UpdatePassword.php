@@ -6,7 +6,6 @@ namespace Domain\Password\Commands;
 
 use Domain\Password\Services\PasswordService;
 use LaravelZero\Framework\Commands\Command;
-use Symfony\Component\Console\Input\InputArgument;
 
 class UpdatePassword extends Command
 {
