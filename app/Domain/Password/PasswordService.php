@@ -129,7 +129,7 @@ final class PasswordService
     {
         $password = Password::query()->find($id);
 
-        return is_null($password) ? false : $password->delete;
+        return is_null($password) ? false : $password->delete();
     }
 
     public function create(Command $command): void
@@ -232,7 +232,9 @@ final class PasswordService
             );
         }
 
-        $password->comment = $comment;
+        if ($comment) {
+            $password->comment = $comment;
+        }
 
         return $password;
     }
