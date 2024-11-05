@@ -103,7 +103,7 @@ final class PasswordService
 
         $this->decryptPasswords();
 
-        if (! $this->isDecrypt) {
+        if (!$this->isDecrypt) {
             $this->shortHashView();
         }
 

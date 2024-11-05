@@ -51,9 +51,10 @@ return [
     */
 
     'exclude' => [
-        'migrations/',
+        'database/',
         'config/',
         'storage/',
+        'vendor/'
     ],
 
     'add' => [],
@@ -66,9 +67,24 @@ return [
         \SlevomatCodingStandard\Sniffs\ControlStructures\DisallowShortTernaryOperatorSniff::class,
         \PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff::class,
         \SlevomatCodingStandard\Sniffs\Functions\FunctionLengthSniff::class,
+        \PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting\SpaceAfterCastSniff::class,
     ],
 
-    'config' => [],
+    'config' => [
+        \PHP_CodeSniffer\Standards\Generic\Sniffs\WhiteSpace\ScopeIndentSniff::class => [
+            'indent' => 4,
+            'tabIndent' => false,
+        ],
+        \PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting\SpaceAfterNotSniff::class => [
+            'spacing' => 0,
+        ],
+        \PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting\SpaceAfterCastSniff::class => [
+            'spacing' => 0,
+        ],
+        \PHP_CodeSniffer\Standards\Generic\Sniffs\Formatting\SpaceBeforeCastSniff::class => [
+            'spacing' => 0,
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------

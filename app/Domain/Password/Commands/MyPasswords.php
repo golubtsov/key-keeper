@@ -11,7 +11,6 @@ use Symfony\Component\Console\Input\InputOption;
 
 class MyPasswords extends Command
 {
-
     protected $signature = 'passwords:list';
 
     protected $description = 'My passwords';
