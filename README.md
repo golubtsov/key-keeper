@@ -14,9 +14,9 @@ composer build
 ```
 php key-keeper start                   - Start project
 php key-keeper passwords:delete        - Delete password
-php key-keeper passwords:get_password  - Get password
+php key-keeper passwords:get           - Get password
 php key-keeper passwords:list          - My passwords
-php key-keeper passwords:new_password  - Add new password
+php key-keeper passwords:new           - Add new password
 php key-keeper passwords:upload        - Upload passwords
 ```
 

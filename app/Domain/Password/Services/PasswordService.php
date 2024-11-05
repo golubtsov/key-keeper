@@ -37,23 +37,24 @@ final class PasswordService
 
     public function __construct(
         private readonly ConvertCollectionStdClassesToArray $convert
-    ) {
+    )
+    {
         self::$key = config('openssl.private_key');
     }
 
     public function initOptions(array $options): void
     {
         $this->resource = $options['resource'] ?? null;
-        $this->offset = (int) $options['offset'];
-        $this->limit = (int) $options['limit'];
-        $this->isDecrypt = (bool) $options['decrypt'];
+        $this->offset = (int)$options['offset'];
+        $this->limit = (int)$options['limit'];
+        $this->isDecrypt = (bool)$options['decrypt'];
     }
 
     public function getPassword(int $id): array
     {
         $this->isDecrypt = true;
 
-        $this->password = (array) DB::table('passwords')
+        $this->password = (array)DB::table('passwords')
             ->select(
                 'passwords.id',
                 'passwords.resource',
@@ -75,7 +76,7 @@ final class PasswordService
     {
         /** @var Password $password */
         $password = Password::query()->find(
-            (int) $command->argument('id')
+            (int)$command->argument('id')
         );
 
         if (is_null($password)) {
@@ -105,8 +106,9 @@ final class PasswordService
      */
     public function getPasswords(
         array $options,
-        bool $likeArray = true
-    ): Collection|array {
+        bool  $likeArray = true
+    ): Collection|array
+    {
         $this->initOptions($options);
 
         $this->passwords = $this->getPasswordsCollection();
@@ -166,6 +168,10 @@ final class PasswordService
         } catch (Exception $exception) {
             DB::rollBack();
             $command->error('Something went wrong!');
+
+            if (config('app.env') === 'development') {
+                $command->error($exception->getMessage());
+            }
         }
     }
 
@@ -209,8 +215,9 @@ final class PasswordService
 
     private function newValuesForPassword(
         UpdatePassword $command,
-        Password $password
-    ): Password {
+        Password       $password
+    ): Password
+    {
         $resource = $command->ask('Enter new resource');
 
         $login = $command->ask('Enter new login');
@@ -230,7 +237,7 @@ final class PasswordService
         if ($newPassword) {
             $password->hash = OpenSSL::encrypt(
                 $newPassword,
-                config('openssl.private_key')
+                self::$key
             );
         }
 
@@ -279,7 +286,7 @@ final class PasswordService
     {
         $this->password['password'] = OpenSSL::decrypt(
             $this->password['hash'],
-            config('openssl.private_key')
+            self::$key
         );
         unset($this->password['hash']);
     }
@@ -290,7 +297,7 @@ final class PasswordService
             $this->passwords->map(static function (stdClass $stdClass) {
                 $stdClass->password = OpenSSL::decrypt(
                     $stdClass->hash,
-                    config('openssl.private_key')
+                    self::$key
                 );
                 return $stdClass;
             });
