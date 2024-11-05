@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Domain\Password\Services;
 
+use Domain\Password\Commands\UpdatePassword;
+use Domain\Password\Models\Password;
 use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -67,6 +69,35 @@ class PasswordService
         $this->decryptPassword();
 
         return $this->password;
+    }
+
+    public function update(UpdatePassword $command): void
+    {
+        /** @var Password $password */
+        $password = Password::query()->find(
+            (int) $command->argument('id')
+        );
+
+        if (is_null($password)) {
+            $command->info('Not found');
+            return;
+        }
+
+        $password = $this->setNewValuesForPassword($command, $password);
+
+        if ($password->isDirty()) {
+            try {
+                DB::beginTransaction();
+                $password->save();
+                DB::commit();
+            } catch (Exception $exception) {
+                DB::rollBack();
+                $command->error($exception->getMessage());
+                return;
+            }
+        }
+
+        $command->info('Password updated!');
     }
 
     /**
@@ -175,6 +206,34 @@ class PasswordService
             echo $exception->getLine() . PHP_EOL;
             DB::rollBack();
         }
+    }
+
+    private function setNewValuesForPassword(
+        UpdatePassword $command,
+        Password $password
+    ): Password {
+        $resource = $command->ask('Enter new resource');
+
+        $login = $command->ask('Enter new login');
+
+        $newPassword = $command->secret('Enter new password');
+
+        if ($resource) {
+            $password->resource = $resource;
+        }
+
+        if ($login) {
+            $password->login = $login;
+        }
+
+        if ($newPassword) {
+            $password->hash = OpenSSL::encrypt(
+                $newPassword,
+                config('openssl.private_key')
+            );
+        }
+
+        return $password;
     }
 
     private function getPasswordsCollection(): Collection

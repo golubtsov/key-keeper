@@ -9,6 +9,7 @@ use Domain\Password\Commands\DeletePassword;
 use Domain\Password\Commands\GetPassword;
 use Domain\Password\Commands\MenuCommand;
 use Domain\Password\Commands\MyPasswords;
+use Domain\Password\Commands\UpdatePassword;
 use Domain\Password\Commands\UploadFromFile;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
             DeletePassword::class,
             UploadFromFile::class,
             MenuCommand::class,
+            UpdatePassword::class,
         ]);
     }
 
