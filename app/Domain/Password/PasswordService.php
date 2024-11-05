@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Domain\Password\Services;
+namespace Domain\Password;
 
 use Domain\Password\Commands\UpdatePassword;
-use Domain\Password\Models\Password;
 use Exception;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
@@ -37,24 +36,23 @@ final class PasswordService
 
     public function __construct(
         private readonly ConvertCollectionStdClassesToArray $convert
-    )
-    {
+    ) {
         self::$key = config('openssl.private_key');
     }
 
     public function initOptions(array $options): void
     {
         $this->resource = $options['resource'] ?? null;
-        $this->offset = (int)$options['offset'];
-        $this->limit = (int)$options['limit'];
-        $this->isDecrypt = (bool)$options['decrypt'];
+        $this->offset = (int) $options['offset'];
+        $this->limit = (int) $options['limit'];
+        $this->isDecrypt = (bool) $options['decrypt'];
     }
 
     public function getPassword(int $id): array
     {
         $this->isDecrypt = true;
 
-        $this->password = (array)DB::table('passwords')
+        $this->password = (array) DB::table('passwords')
             ->select(
                 'passwords.id',
                 'passwords.resource',
@@ -76,7 +74,7 @@ final class PasswordService
     {
         /** @var Password $password */
         $password = Password::query()->find(
-            (int)$command->argument('id')
+            (int) $command->argument('id')
         );
 
         if (is_null($password)) {
@@ -106,9 +104,8 @@ final class PasswordService
      */
     public function getPasswords(
         array $options,
-        bool  $likeArray = true
-    ): Collection|array
-    {
+        bool $likeArray = true
+    ): Collection|array {
         $this->initOptions($options);
 
         $this->passwords = $this->getPasswordsCollection();
@@ -215,9 +212,8 @@ final class PasswordService
 
     private function newValuesForPassword(
         UpdatePassword $command,
-        Password       $password
-    ): Password
-    {
+        Password $password
+    ): Password {
         $resource = $command->ask('Enter new resource');
 
         $login = $command->ask('Enter new login');

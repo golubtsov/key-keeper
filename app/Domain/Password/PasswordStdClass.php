@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain\Password\Models;
+namespace Domain\Password;
 
 use Illuminate\Support\Carbon;
 use stdClass;

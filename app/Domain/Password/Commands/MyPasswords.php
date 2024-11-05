@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Domain\Password\Commands;
 
 use App\Console\Command;
-use Domain\Password\Services\PasswordService;
+use Domain\Password\PasswordService;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 

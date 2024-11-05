@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Domain\Password\Commands;
 
 use App\Console\Command;
-use Domain\Password\Models\PasswordStdClass;
-use Domain\Password\Services\PasswordService;
+use Domain\Password\PasswordService;
+use Domain\Password\PasswordStdClass;
 use Illuminate\Support\Collection;
 use stdClass;
 

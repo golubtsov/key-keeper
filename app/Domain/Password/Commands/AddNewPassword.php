@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Password\Commands;
 
-use Domain\Password\Services\PasswordService;
+use Domain\Password\PasswordService;
 use LaravelZero\Framework\Commands\Command;
 
 class AddNewPassword extends Command
